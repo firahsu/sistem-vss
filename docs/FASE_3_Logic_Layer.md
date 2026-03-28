@@ -5,7 +5,7 @@
 | Field | Detail |
 |-------|--------|
 | **Fase** | 3 dari 5 |
-| **Status** | ⬜ Belum Dimulai |
+| **Status** | ✅ Selesai |
 | **Prasyarat** | [Fase 2](FASE_2_Backend_Core.md) selesai dan checklist gate terpenuhi |
 | **Fase Selanjutnya** | [Fase 4 — Frontend](FASE_4_Frontend.md) |
 | **Referensi TRD** | Bagian 5.4 (Indexer), 5.5 (Searcher), 2.2 (Alur Data), 7 (Matematika), 8.2 (Incremental) |
@@ -239,11 +239,11 @@ embeddings = embedder.embed_batch(combined_texts, batch_size=32)
 
 ### Langkah — Checklist Bagian A
 
-- [ ] **3.1** File `modules/indexer.py` diimplementasi sesuai kode di atas
-- [ ] **3.2** Indexer berhasil dijalankan tanpa error: `python -m modules.indexer`
-- [ ] **3.3** `db.count()` mengembalikan jumlah yang sesuai dengan baris dataset
-- [ ] **3.4** Folder `chroma_db/` terisi (bukan kosong)
-- [ ] **3.5** Catat waktu proses indexing: ______ menit (isi manual)
+- [x] **3.1** File `modules/indexer.py` diimplementasi sesuai kode di atas
+- [x] **3.2** Indexer berhasil dijalankan tanpa error: `python -m modules.indexer`
+- [x] **3.3** `db.count()` mengembalikan jumlah yang sesuai dengan baris dataset
+- [x] **3.4** Folder `chroma_db/` terisi (bukan kosong)
+- [x] **3.5** Catat waktu proses indexing: 0.27 menit (~16.15 detik)
 
 ---
 
@@ -487,12 +487,12 @@ print('Perhatikan: query yang relevan seharusnya punya similarity lebih tinggi.'
 
 ### Langkah — Checklist Bagian B
 
-- [ ] **3.6** File `modules/searcher.py` diimplementasi sesuai kode di atas
-- [ ] **3.7** `search()` mengembalikan list of dict dengan format yang benar
-- [ ] **3.8** Similarity score berada di rentang 0.0 – 1.0
-- [ ] **3.9** Hasil terurut dari similarity tertinggi ke terendah
-- [ ] **3.10** Judul mirip menghasilkan similarity tinggi
-- [ ] **3.11** Judul berbeda topik menghasilkan similarity rendah
+- [x] **3.6** File `modules/searcher.py` diimplementasi sesuai kode di atas
+- [x] **3.7** `search()` mengembalikan list of dict dengan format yang benar
+- [x] **3.8** Similarity score berada di rentang 0.0 – 1.0
+- [x] **3.9** Hasil terurut dari similarity tertinggi ke terendah
+- [x] **3.10** Judul mirip menghasilkan similarity tinggi
+- [x] **3.11** Judul berbeda topik menghasilkan similarity rendah
 
 ---
 
@@ -531,9 +531,9 @@ print('\\n✅ Backend end-to-end test selesai!')
 
 ### Langkah — Checklist End-to-End
 
-- [ ] **3.12** Database terisi dengan jumlah dokumen yang benar
-- [ ] **3.13** Tiga query berbeda menghasilkan hasil yang masuk akal
-- [ ] **3.14** Tidak ada error selama pengujian
+- [x] **3.12** Database terisi dengan jumlah dokumen yang benar
+- [x] **3.13** Tiga query berbeda menghasilkan hasil yang masuk akal
+- [x] **3.14** Tidak ada error selama pengujian
 
 ---
 
@@ -545,24 +545,24 @@ print('\\n✅ Backend end-to-end test selesai!')
 
 ### Indexer
 
-- [ ] Seluruh dataset berhasil di-index ke ChromaDB tanpa error
-- [ ] `db.count()` mengembalikan jumlah yang sesuai dengan jumlah baris dataset
-- [ ] Folder `chroma_db/` terisi dan tidak kosong
-- [ ] Waktu indexing dicatat (untuk referensi)
+- [x] Seluruh dataset berhasil di-index ke ChromaDB tanpa error
+- [x] `db.count()` mengembalikan jumlah yang sesuai dengan jumlah baris dataset
+- [x] Folder `chroma_db/` terisi dan tidak kosong
+- [x] Waktu indexing dicatat (untuk referensi)
 
 ### Searcher
 
-- [ ] `Searcher.search()` mengembalikan list of dict dengan field: `judul`, `mahasiswa`, `tahun`, `prodi`, `similarity`
-- [ ] Similarity score berada di rentang 0.0 – 1.0
-- [ ] Judul yang identik/sangat mirip → similarity mendekati 1.0
-- [ ] Judul berbeda topik → similarity rendah
-- [ ] Hasil terurut dari similarity tertinggi ke terendah
+- [x] `Searcher.search()` mengembalikan list of dict dengan field: `judul`, `mahasiswa`, `tahun`, `prodi`, `similarity`
+- [x] Similarity score berada di rentang 0.0 – 1.0
+- [x] Judul yang identik/sangat mirip → similarity mendekati 1.0
+- [x] Judul berbeda topik → similarity rendah
+- [x] Hasil terurut dari similarity tertinggi ke terendah
 
 ### Backend End-to-End
 
-- [ ] Alur lengkap Dataset → Index → Query → Hasil berjalan tanpa error
-- [ ] Minimal 3 query berbeda diuji dan hasilnya masuk akal
-- [ ] Semua modul (preprocessor, embedder, database, indexer, searcher) dapat diimport tanpa error
+- [x] Alur lengkap Dataset → Index → Query → Hasil berjalan tanpa error
+- [x] Minimal 3 query berbeda diuji dan hasilnya masuk akal
+- [x] Semua modul (preprocessor, embedder, database, indexer, searcher) dapat diimport tanpa error
 
 ### Verifikasi Akhir
 

@@ -5,7 +5,7 @@
 | Field | Detail |
 |-------|--------|
 | **Fase** | 4 dari 5 |
-| **Status** | ⬜ Belum Dimulai |
+| **Status** | ✅ Selesai |
 | **Prasyarat** | [Fase 3](FASE_3_Logic_Layer.md) selesai dan checklist gate terpenuhi |
 | **Fase Selanjutnya** | [Fase 5 — Integrasi & Testing](FASE_5_Integrasi_Testing.md) |
 | **Referensi TRD** | Bagian 5.6 (app.py), Bagian 9 (Batasan & Disclaimer) |
@@ -251,7 +251,7 @@ st.dataframe(
 
 ```powershell
 # Pastikan berada di root proyek dan venv aktif
-cd D:\.KULIAHKU\Bismillah\skripsi-similarity
+cd D:\.KULIAHKU\Bismillah\vss
 
 # Jalankan Streamlit
 streamlit run app.py
@@ -333,14 +333,14 @@ Tekan `Ctrl+C` di terminal untuk menghentikan server Streamlit.
 
 ### Langkah — Checklist Pengujian
 
-- [ ] **4.1** File `app.py` diimplementasi sesuai kode di atas
-- [ ] **4.2** `streamlit run app.py` berjalan tanpa error
-- [ ] **4.3** Halaman web terbuka di `http://localhost:8501`
-- [ ] **4.4** Test 1 (input kosong) — warning muncul
-- [ ] **4.5** Test 2 (input valid) — spinner, success, tabel muncul
-- [ ] **4.6** Test 3 (slider) — jumlah baris berubah sesuai slider
-- [ ] **4.7** Test 4 (responsif) — tabel menyesuaikan lebar
-- [ ] **4.8** Test 5 (multiple searches) — tidak ada error
+- [x] **4.1** File `app.py` diimplementasi sesuai kode di atas
+- [x] **4.2** `streamlit run app.py` berjalan tanpa error
+- [x] **4.3** Halaman web terbuka di `http://localhost:8501`
+- [x] **4.4** Test 1 (input kosong) — warning muncul
+- [x] **4.5** Test 2 (input valid) — spinner, success, tabel muncul
+- [x] **4.6** Test 3 (slider) — jumlah baris berubah sesuai slider
+- [x] **4.7** Test 4 (responsif) — tabel menyesuaikan lebar
+- [x] **4.8** Test 5 (multiple searches) — tidak ada error
 
 ---
 
@@ -352,20 +352,20 @@ Tekan `Ctrl+C` di terminal untuk menghentikan server Streamlit.
 
 ### Fungsionalitas
 
-- [ ] `streamlit run app.py` berjalan tanpa error di terminal
-- [ ] Halaman web berhasil terbuka di browser (`http://localhost:8501`)
-- [ ] Input judul kosong memunculkan pesan warning
-- [ ] Input judul valid menampilkan tabel hasil pencarian
-- [ ] Tabel memiliki 5 kolom: Judul, Mahasiswa, Tahun, Prodi, Similarity
-- [ ] Slider Top-N berfungsi mengubah jumlah baris hasil
-- [ ] Gradient warna biru muncul pada kolom Similarity
+- [x] `streamlit run app.py` berjalan tanpa error di terminal
+- [x] Halaman web berhasil terbuka di browser (`http://localhost:8501`)
+- [x] Input judul kosong memunculkan pesan warning
+- [x] Input judul valid menampilkan tabel hasil pencarian
+- [x] Tabel memiliki 5 kolom: Judul, Mahasiswa, Tahun, Prodi, Similarity
+- [x] Slider Top-N berfungsi mengubah jumlah baris hasil
+- [x] Gradient warna biru muncul pada kolom Similarity
 
 ### Performa & UX
 
-- [ ] Spinner "Memproses..." muncul saat pencarian berlangsung
-- [ ] Pesan success muncul setelah pencarian selesai
-- [ ] Pencarian berulang (3+ kali) tidak menyebabkan error
-- [ ] Model tidak di-reload setiap pencarian (cache berfungsi)
+- [x] Spinner "Memproses..." muncul saat pencarian berlangsung
+- [x] Pesan success muncul setelah pencarian selesai
+- [x] Pencarian berulang (3+ kali) tidak menyebabkan error
+- [x] Model tidak di-reload setiap pencarian (cache berfungsi)
 
 ### Verifikasi Akhir
 

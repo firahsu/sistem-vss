@@ -620,31 +620,31 @@ print('\\n✅ Test integrasi PASSED!')
 
 ### Preprocessor
 
-- [ ] `preprocess_text()` menghasilkan output bersih dan konsisten
-- [ ] `combine_title_abstract()` menggabungkan judul+abstrak dengan benar
-- [ ] Semua test case preprocessor PASSED
+- [x] preprocess_text() menghasilkan output bersih dan konsisten
+- [x] combine_title_abstract() menggabungkan judul+abstrak dengan benar
+- [x] Semua test case preprocessor PASSED
 
 ### Embedder
 
-- [ ] Model bge-m3 berhasil di-load di GPU (`device: cuda`)
-- [ ] `embed()` menghasilkan vektor berdimensi 1024
-- [ ] Vektor ternormalisasi (norm ≈ 1.0)
-- [ ] `embed_batch()` berfungsi tanpa error
-- [ ] Semua test case embedder PASSED
+- [x] Model bge-m3 berhasil di-load di GPU (device: cuda)
+- [x] embed() menghasilkan vektor berdimensi 1024
+- [x] Vektor ternormalisasi (norm ≈ 1.0)
+- [x] embed_batch() berfungsi tanpa error
+- [x] Semua test case embedder PASSED
 
 ### Database
 
-- [ ] `insert()` dan `insert_batch()` berfungsi
-- [ ] `query()` mengembalikan hasil yang benar
-- [ ] `count()` konsisten
-- [ ] Data persistent (tetap ada setelah restart)
-- [ ] Semua test case database PASSED
+- [x] insert() dan insert_batch() berfungsi
+- [x] query() mengembalikan hasil yang benar
+- [x] count() konsisten
+- [x] Data persistent (tetap ada setelah restart)
+- [x] Semua test case database PASSED
 
 ### Integrasi
 
-- [ ] Alur lengkap Preprocess → Embed → Insert → Query berjalan tanpa error
-- [ ] Import antar modul tidak bermasalah
-- [ ] Hasil query masuk akal secara semantik (judul mirip → similarity tinggi)
+- [x] Alur lengkap Preprocess → Embed → Insert → Query berjalan tanpa error
+- [x] Import antar modul tidak bermasalah
+- [x] Hasil query masuk akal secara semantik (judul mirip → similarity tertinggi 0.574)
 
 ### Verifikasi Akhir
 

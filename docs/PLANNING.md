@@ -16,9 +16,9 @@
 | Fase | Nama | File Detail | Status |
 |------|------|-------------|--------|
 | 1 | Setup Environment & Struktur Proyek | [FASE_1_Setup_Environment.md](FASE_1_Setup_Environment.md) | ⬜ Belum Dimulai |
-| 2 | Backend Core (Preprocessing + Embedding + Database) | [FASE_2_Backend_Core.md](FASE_2_Backend_Core.md) | ⬜ Belum Dimulai |
-| 3 | Logic Layer (Indexer + Searcher) | [FASE_3_Logic_Layer.md](FASE_3_Logic_Layer.md) | ⬜ Belum Dimulai |
-| 4 | Frontend (Streamlit UI) | [FASE_4_Frontend.md](FASE_4_Frontend.md) | ⬜ Belum Dimulai |
+| 2 | Backend Core (Preprocessing + Embedding + Database) | [FASE_2_Backend_Core.md](FASE_2_Backend_Core.md) | ✅ Selesai |
+| 3 | Logic Layer (Indexer + Searcher) | [FASE_3_Logic_Layer.md](FASE_3_Logic_Layer.md) | ✅ Selesai |
+| 4 | Frontend (Streamlit UI) | [FASE_4_Frontend.md](FASE_4_Frontend.md) | ✅ Selesai |
 | 5 | Integrasi, Testing & Finalisasi | [FASE_5_Integrasi_Testing.md](FASE_5_Integrasi_Testing.md) | ⬜ Belum Dimulai |
 
 > **Legenda Status:** ⬜ Belum Dimulai · 🔄 Sedang Dikerjakan · ✅ Selesai
