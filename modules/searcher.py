@@ -39,6 +39,7 @@ class Searcher:
 			results.append(
 				{
 					"judul": metadata.get("judul", "-"),
+					"abstrak": metadata.get("abstrak", "Abstrak tidak tersedia."),
 					"mahasiswa": metadata.get("mahasiswa", "-"),
 					"tahun": metadata.get("tahun", "-"),
 					"prodi": metadata.get("prodi", "-"),

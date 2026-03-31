@@ -68,6 +68,7 @@ Setiap entri menggunakan format tabel berikut. **Salin template di bawah** untuk
 | RN-009 | 2026-03-15 | Fase 1 — Fase 3 | Catatan Teknis | 🟡 Sedang | ✅ Selesai | Dataset memiliki banyak baris kosong sehingga indexer perlu memfilter dokumen valid |
 | RN-010 | 2026-03-15 | Umum (lintas fase) | Catatan Teknis | 🟡 Sedang | ✅ Selesai | Penambahan dependency global matplotlib saat eksekusi Fase 4 |
 | RN-011 | 2026-03-15 | Umum (lintas fase) | Catatan Teknis | 🟡 Sedang | ✅ Selesai | Migrasi parameter `st.dataframe` karena deprecation Streamlit |
+| RN-012 | 2026-03-28 | Umum (lintas fase) | Catatan Teknis | 🟡 Sedang | ✅ Selesai | Wajib re-index ChromaDB setelah merubah struktur metadata/dataset |
 
 ---
 
@@ -269,3 +270,20 @@ Salin template dari bagian "Template Entri"
 dan tambahkan separator (---) sebelum entri
 =============================================
 -->
+
+---
+
+### RN-012
+
+| Field | Isi |
+|-------|-----|
+| **ID** | RN-012 |
+| **Tanggal** | 2026-03-28 |
+| **Fase Terkait** | Umum (lintas fase) |
+| **Kategori** | Catatan Teknis |
+| **Prioritas** | 🟡 Sedang |
+| **Status** | ✅ Selesai |
+| **Judul** | Wajib re-index ChromaDB setelah merubah struktur metadata/dataset |
+| **Detail** | Setelah *update* baris kode `indexer.py` untuk menyisipkan *field* `abstrak` ke *metadata* dan menampilkannya pada UI via `app.py`, UI masih tetap memunculkan teks *default* fallback "Abstrak tidak tersedia". Kegagalan ini disebabkan karena index vektor *ChromaDB* belum di-*rebuild*, sehingga database masih menyimpan salinan *metadata* format lama yang belum memuat *key* `"abstrak"`. |
+| **Tindakan** | Pengingat/SOP baru: Selalu jalankan ulang proses *indexing* (`python -m modules.indexer`) setiap kali struktur *script* modifikasi metadata berubah, atau ketika file master Excel dataset mengalami perubahan nilai. |
+| **Resolusi** | `indexer.py` dieksekusi ulang sehingga menghapus memori *ChromaDB* usang dan secara otomatis membangun 112 *index* dokumen komplit dengan metadata terbarunya. Komponen abstrak kini telah sukses ditampilkan pada UI (Streamlit) tanpa adanya anomali data kosong. |

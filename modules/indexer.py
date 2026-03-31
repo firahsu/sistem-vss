@@ -114,6 +114,7 @@ def build_index(dataset_path: str = "./data/dataset.xlsx"):
 		metadatas.append(
 			{
 				"judul": _stringify_value(row.get("judul")),
+				"abstrak": _stringify_value(row.get("abstrak")),
 				"mahasiswa": _stringify_value(row.get("mahasiswa")),
 				"tahun": _stringify_value(row.get("tahun")),
 				"prodi": _stringify_value(row.get("prodi")),
