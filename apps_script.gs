@@ -20,7 +20,11 @@
 // ============================================================================
 // KONFIGURASI
 // ============================================================================
-const WEBHOOK_URL = "https://fbm2z5r4-8000.asse.devtunnels.ms/webhook"; // DevTunnels URL
+// GANTI dengan URL server webhook Anda (contoh: http://localhost:8000/webhook atau https://domain.com/webhook)
+const WEBHOOK_URL = "http://localhost:8000/webhook";
+
+// Set true hanya saat debugging (akan banyak log di Apps Script)
+const DEBUG = false;
 
 
 // ============================================================================
@@ -55,9 +59,11 @@ function getLatestSubmission() {
   const row = values[0];
   
   // DEBUG: Log seluruh row untuk melihat struktur asli
-  Logger.log("[DEBUG] Seluruh row array:");
-  for (let i = 0; i < 15; i++) {
-    Logger.log(`[${i}] = ${row[i]}`);
+  if (DEBUG) {
+    Logger.log("[DEBUG] Seluruh row array:");
+    for (let i = 0; i < 15; i++) {
+      Logger.log(`[${i}] = ${row[i]}`);
+    }
   }
   
   // Mapping kolom sesuai urutan Google Sheet (hasil debug):
