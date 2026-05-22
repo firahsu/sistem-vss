@@ -40,9 +40,9 @@ class Searcher:
 				{
 					"judul": metadata.get("judul", "-"),
 					"abstrak": metadata.get("abstrak", "Abstrak tidak tersedia."),
-					"mahasiswa": metadata.get("mahasiswa", "-"),
+					"mahasiswa": metadata.get("nama", metadata.get("mahasiswa", "-")),  # Map 'nama' from webhook
 					"tahun": metadata.get("tahun", "-"),
-					"prodi": metadata.get("prodi", "-"),
+					"prodi": metadata.get("jurusan", metadata.get("prodi", "-")),  # Map 'jurusan' from webhook
 					"similarity": round(similarity_score, 4),
 				}
 			)

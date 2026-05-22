@@ -48,3 +48,12 @@ class VectorDatabase:
 	def count(self) -> int:
 		"""Mengembalikan jumlah dokumen dalam database."""
 		return self.collection.count()
+
+	def get_all(self):
+		"""Mengambil semua dokumen."""
+		return self.collection.get(include=["metadatas"])
+
+	def delete(self, doc_id: str):
+		"""Menghapus dokumen berdasarkan ID."""
+		self.collection.delete(ids=[doc_id])
+
