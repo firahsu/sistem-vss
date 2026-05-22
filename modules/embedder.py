@@ -14,7 +14,7 @@ class Embedder:
 		Load model dengan retry ringan untuk menangani error intermiten
 		`httpx client has been closed` dari huggingface_hub.
 		"""
-		base_kwargs = {"use_safetensors": True}
+		base_kwargs = {"use_safetensors": False}  # Use PyTorch format instead of safetensors
 
 		for attempt in range(2):
 			try:
