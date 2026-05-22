@@ -8,4 +8,16 @@ chroma_db_test
 data
 
 venv
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Test/tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# VS Code (keep extension recommendations, ignore local settings)
+.vscode/settings.json
 TRD_Sistem_Deteksi_Kemiripan_Judul_TA.md
