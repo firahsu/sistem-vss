@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import re
+from datetime import datetime
 
 from modules.searcher import Searcher
 from modules.preprocessor import combine_title_abstract
@@ -54,6 +55,37 @@ def highlight_matching_words(query: str, result_title: str) -> str:
 		return word
 		
 	return re.sub(r'\b\w+\b', repl, result_title)
+
+
+def format_timestamp(value):
+	if not value:
+		return "-"
+	try:
+		return datetime.fromisoformat(str(value).replace("Z", "+00:00")).strftime("%d-%m-%Y %H:%M:%S")
+	except Exception:
+		return str(value)
+
+
+def get_sync_stats_safe(searcher):
+	db = searcher.db
+	getter = getattr(db, "get_sync_stats", None)
+	if callable(getter):
+		try:
+			return getter()
+		except Exception as exc:
+			st.warning(f"Gagal memuat statistik sinkronisasi: {exc}")
+
+	return {
+		"total_documents": db.count() if hasattr(db, "count") else 0,
+		"total_logs": 0,
+		"total_records": db.count() if hasattr(db, "count") else 0,
+		"status_counts": {},
+		"source_counts": {},
+		"form_submit_count": 0,
+		"daily_sync_count": 0,
+		"initial_index_count": 0,
+		"latest_sync_at": None,
+	}
 
 
 def page_login():
@@ -114,12 +146,13 @@ def page_pencarian(searcher):
 def page_manajemen(searcher):
 	st.title("⚙️ Manajemen Data Tugas Akhir")
 
-	tab_list, tab_delete = st.tabs(["📋 Daftar Judul", "🗑️ Hapus Data"])
+	stats = get_sync_stats_safe(searcher)
+	tab_list, tab_log, tab_sync, tab_delete = st.tabs(["📋 Daftar Judul", "🧾 Log Status", "📈 Info Sinkronisasi", "🗑️ Hapus Data"])
 
 	with tab_list:
 		st.subheader("Daftar Data Tersimpan")
 		if st.button("Refresh Data"):
-			pass
+			st.rerun()
 
 		data_res = searcher.db.get_all()
 		ids = data_res.get("ids", [])
@@ -128,13 +161,17 @@ def page_manajemen(searcher):
 		if ids:
 			table_data = []
 			for i, (idx, m) in enumerate(zip(ids, metas), 1):
+				metadata = m or {}
 				table_data.append({
 					"No": i,
 					"ID Dokumen": idx,
-					"Judul": m.get("judul", "-"),
-					"Mahasiswa": m.get("nama", m.get("mahasiswa", "-")),  # Map 'nama' from webhook
-					"Tahun": m.get("tahun", "-"),
-					"Prodi": m.get("jurusan", m.get("prodi", "-"))  # Map 'jurusan' from webhook
+					"Judul": metadata.get("judul", "-"),
+					"Mahasiswa": metadata.get("nama", metadata.get("mahasiswa", "-")),
+					"Tahun": metadata.get("tahun", "-"),
+					"Prodi": metadata.get("jurusan", metadata.get("prodi", "-")),
+					"Status": metadata.get("status", "success"),
+					"Sumber": metadata.get("source", "initial_index"),
+					"Ditambahkan": format_timestamp(metadata.get("synced_at") or metadata.get("created_at")),
 				})
 
 			df_display = pd.DataFrame(table_data)
@@ -142,6 +179,64 @@ def page_manajemen(searcher):
 			st.caption(f"Total ada {len(ids)} dokumen yang tersimpan.")
 		else:
 			st.info("Belum ada data di database.")
+
+	with tab_log:
+		st.subheader("Log Status Sinkronisasi")
+		log_filter = st.selectbox("Filter status", ["all", "success", "duplicate", "failed"], index=0)
+		log_res = searcher.db.get_all_logs()
+		log_ids = log_res.get("ids", [])
+		log_metas = log_res.get("metadatas", [])
+
+		log_rows = []
+		for i, (idx, metadata) in enumerate(zip(log_ids, log_metas), 1):
+			meta = metadata or {}
+			status = meta.get("status", "failed")
+			if log_filter != "all" and status != log_filter:
+				continue
+			log_rows.append({
+				"No": i,
+				"Log ID": idx,
+				"Status": status,
+				"Sumber": meta.get("source", "unknown"),
+				"Mahasiswa": meta.get("nama", "-"),
+				"Judul": meta.get("judul", "-"),
+				"Tahun": meta.get("tahun", "-"),
+				"Pesan": meta.get("message", "-"),
+				"Terkait": meta.get("related_doc_id", meta.get("attempt_doc_id", "-")),
+				"Waktu": format_timestamp(meta.get("synced_at") or meta.get("created_at")),
+			})
+
+		if log_rows:
+			st.dataframe(pd.DataFrame(log_rows), use_container_width=True)
+		else:
+			st.info("Belum ada log sinkronisasi untuk filter ini.")
+
+	with tab_sync:
+		st.subheader("Info Sinkronisasi")
+		col1, col2, col3, col4 = st.columns(4)
+		col1.metric("Total Dokumen", stats.get("total_documents", 0))
+		col2.metric("Dari Form", stats.get("form_submit_count", 0))
+		col3.metric("Dari Sync Harian", stats.get("daily_sync_count", 0))
+		col4.metric("Index Awal", stats.get("initial_index_count", 0))
+
+		st.divider()
+		st.write("**Status Ringkasan**")
+		status_counts = stats.get("status_counts", {})
+		status_df = pd.DataFrame([
+			{"Status": key, "Jumlah": value}
+			for key, value in status_counts.items()
+		])
+		st.dataframe(status_df, use_container_width=True, hide_index=True)
+
+		st.write("**Sumber Sinkronisasi**")
+		source_counts = stats.get("source_counts", {})
+		source_df = pd.DataFrame([
+			{"Sumber": key, "Jumlah": value}
+			for key, value in source_counts.items()
+		])
+		st.dataframe(source_df, use_container_width=True, hide_index=True)
+
+		st.caption(f"Sinkronisasi terakhir: {format_timestamp(stats.get('latest_sync_at'))}")
 
 	with tab_delete:
 		st.subheader("Hapus Data Dokumen")
@@ -182,7 +277,9 @@ with st.sidebar:
 	st.divider()
 
 	total_data = searcher.db.count()
+	sidebar_stats = get_sync_stats_safe(searcher)
 	st.caption(f"📁 {total_data} judul tersimpan")
+	st.caption(f"⏱️ Sinkronisasi terakhir: {format_timestamp(sidebar_stats.get('latest_sync_at'))}")
 
 	if st.session_state["is_admin"]:
 		st.markdown("⚙️ **Administrator | admin**")
