@@ -21,6 +21,7 @@
 // KONFIGURASI
 // ============================================================================
 const WEBHOOK_URL = "https://fbm2z5r4-8000.asse.devtunnels.ms/webhook"; // DevTunnels URL
+const WEBHOOK_BATCH_URL = "https://fbm2z5r4-8000.asse.devtunnels.ms/webhook/batch";
 
 
 // ============================================================================
@@ -78,6 +79,53 @@ function getLatestSubmission() {
 
 
 /**
+ * Mengambil semua submission dari sheet untuk daily sync.
+ *
+ * @return {Array<Object>} Daftar data submission.
+ */
+function getAllSubmissions() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Form Responses");
+
+  if (!sheet) {
+    throw new Error("Sheet 'Form Responses' tidak ditemukan. Silakan periksa nama sheet.");
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    Logger.log("[Apps Script] Tidak ada data untuk sinkronisasi batch");
+    return [];
+  }
+
+  const range = sheet.getRange(2, 1, lastRow - 1, 20);
+  const values = range.getValues();
+  const submissions = [];
+
+  values.forEach((row, index) => {
+    const data = {
+      rowNumber: index + 2,
+      timestamp: row[2] || "",
+      nama: row[4] || "",
+      jurusan: row[6] || "",
+      judul: row[10] || "",
+      abstrak: row[11] || "",
+      tahun: row[13] || "",
+    };
+
+    if (!data.judul.toString().trim() || !data.abstrak.toString().trim()) {
+      Logger.log(`[Apps Script] Skip row ${data.rowNumber} karena judul/abstrak kosong`);
+      return;
+    }
+
+    submissions.push(data);
+  });
+
+  Logger.log(`[Apps Script] Total submission valid untuk batch: ${submissions.length}`);
+  return submissions;
+}
+
+
+/**
  * Kirim data ke webhook via HTTP POST.
  */
 function sendToWebhook(data) {
@@ -128,6 +176,49 @@ function sendToWebhook(data) {
     Logger.log("[Apps Script] CATCH: " + error.toString());
     throw error;
   }
+}
+
+
+/**
+ * Kirim batch data ke webhook.
+ */
+function sendBatchToWebhook(documents) {
+  if (!documents || documents.length === 0) {
+    Logger.log("[Apps Script] Batch kosong, tidak ada yang dikirim");
+    return null;
+  }
+
+  const payload = {
+    documents: documents.map((data) => ({
+      nama: data.nama.toString().trim(),
+      judul: data.judul.toString().trim(),
+      abstrak: data.abstrak.toString().trim(),
+      jurusan: data.jurusan.toString().trim(),
+      tahun: data.tahun.toString().trim(),
+    })),
+  };
+
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true,
+    timeout: 120,
+  };
+
+  Logger.log(`[Apps Script] Mengirim batch ${documents.length} dokumen ke webhook batch`);
+  const response = UrlFetchApp.fetch(WEBHOOK_BATCH_URL, options);
+  const responseCode = response.getResponseCode();
+  const responseText = response.getContentText();
+
+  Logger.log(`[Apps Script] Batch response code: ${responseCode}`);
+  Logger.log(`[Apps Script] Batch response: ${responseText}`);
+
+  if (responseCode >= 200 && responseCode < 300) {
+    return JSON.parse(responseText);
+  }
+
+  throw new Error(`Batch request gagal dengan status ${responseCode}`);
 }
 
 
@@ -222,4 +313,54 @@ function testWebhookManual() {
     Logger.log("[Apps Script] Error: " + error.toString());
     Logger.log("[Apps Script] Message: " + error.message);
   }
+}
+
+
+/**
+ * Sinkronisasi semua submission ke webhook batch.
+ * Jalankan manual sekali, lalu gunakan trigger harian.
+ */
+function syncAllSubmissions() {
+  Logger.log("[Apps Script] ===== syncAllSubmissions() STARTED =====");
+
+  try {
+    const documents = getAllSubmissions();
+
+    if (documents.length === 0) {
+      Logger.log("[Apps Script] Tidak ada dokumen valid untuk dikirim");
+      return null;
+    }
+
+    const result = sendBatchToWebhook(documents);
+    Logger.log("[Apps Script] Batch sync result: " + JSON.stringify(result));
+    Logger.log("[Apps Script] ===== syncAllSubmissions() FINISHED (SUCCESS) =====");
+    return result;
+  } catch (error) {
+    Logger.log("[Apps Script] ===== ERROR in syncAllSubmissions() =====");
+    Logger.log("[Apps Script] Error: " + error.toString());
+    Logger.log("[Apps Script] Message: " + error.message);
+    throw error;
+  }
+}
+
+
+/**
+ * Set trigger harian untuk syncAllSubmissions() pada jam 19:00.
+ * Jalankan manual sekali dari editor.
+ */
+function setupDailyTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach((trigger) => {
+    if (trigger.getHandlerFunction() === "syncAllSubmissions") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  ScriptApp.newTrigger("syncAllSubmissions")
+    .timeBased()
+    .everyDays(1)
+    .atHour(19)
+    .create();
+
+  Logger.log("[Apps Script] Daily trigger untuk syncAllSubmissions berhasil dibuat pada jam 19:00");
 }
