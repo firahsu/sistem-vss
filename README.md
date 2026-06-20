@@ -11,24 +11,55 @@ kemiripan topik sebelum ACC judul tugas akhir.
 
 ## Cara Menjalankan
 
-1) Buat & aktifkan virtualenv
+Berikut langkah singkat menjalankan proyek menggunakan virtual environment (`venv`) di Windows.
 
-- Windows PowerShell:
-	- `python -m venv venv`
-	- `venv\Scripts\Activate.ps1`
+1) Buat dan aktifkan virtualenv
 
-2) Install dependency
+- PowerShell (direkomendasikan):
+  - `python -m venv venv`
+  - `venv\Scripts\Activate.ps1`
+
+- CMD (jika tidak pakai PowerShell):
+  - `python -m venv venv`
+  - `venv\Scripts\activate.bat`
+
+2) Install dependensi
 
 - `pip install -r requirements.txt`
 
-Catatan penting:
-- Jika muncul error terkait **CVE-2025-32434** / "upgrade torch to at least v2.6", berarti `torch` Anda terlalu lama.
-	Upgrade `torch`/`torchvision`/`torchaudio` ke versi >= 2.6.
-	- CPU: `pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
-	- CUDA 12.4: `pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124`
+3) (Jika perlu) Perbaiki masalah `torch`
 
-	Catatan: wheel `cu121` umumnya mentok di `torch 2.5.1`, jadi untuk `torch>=2.6` gunakan `cu124`.
+- Jika muncul error terkait **CVE-2025-32434** atau peringatan bahwa `torch` harus >= 2.6, jalankan salah satu perintah berikut sesuai kebutuhan lingkungan Anda:
+  - CPU: `pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
+  - CUDA 12.4: `pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124`
 
-3) Jalankan aplikasi
+4) Menjalankan aplikasi Streamlit (dengan `venv` aktif)
 
 - `streamlit run app.py`
+
+5) Menjalankan server webhook (jalankan di terminal terpisah, dengan `venv` aktif)
+
+- `python webhook_server.py`
+
+Contoh alur di PowerShell (dua terminal):
+
+Terminal 1 (Streamlit):
+
+``powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app.py
+``
+
+Terminal 2 (Webhook server):
+
+``powershell
+venv\Scripts\Activate.ps1
+python webhook_server.py
+``
+
+Catatan:
+- Pastikan kedua terminal menggunakan `venv` yang sama agar dependensi konsisten.
+- Jika server webhook membutuhkan port atau konfigurasi lain, sesuaikan `webhook_server.py` atau gunakan variabel environment.
+
