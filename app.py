@@ -3,8 +3,12 @@ import streamlit as st
 import re
 from datetime import datetime
 
-from modules.searcher import Searcher
+import os
+import requests
 from modules.preprocessor import combine_title_abstract
+
+API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
+
 
 st.set_page_config(
 	page_title="Deteksi Kemiripan Judul TA",
@@ -18,9 +22,53 @@ if "show_login" not in st.session_state:
 	st.session_state["show_login"] = False
 
 
+class RemoteDB:
+	"""Menggantikan VectorDatabase — semua panggilan lewat HTTP ke FastAPI."""
+
+	def __init__(self, base_url: str):
+		self.base_url = base_url
+
+	def count(self) -> int:
+		resp = requests.get(f"{self.base_url}/status", timeout=10)
+		resp.raise_for_status()
+		return resp.json().get("total_documents", 0)
+
+	def get_all(self) -> dict:
+		resp = requests.get(f"{self.base_url}/documents", timeout=15)
+		resp.raise_for_status()
+		return resp.json()
+
+	def get_sync_stats(self) -> dict:
+		resp = requests.get(f"{self.base_url}/sync-stats", timeout=10)
+		resp.raise_for_status()
+		return resp.json()
+
+	def delete(self, doc_id: str):
+		resp = requests.delete(f"{self.base_url}/documents/{doc_id}", timeout=10)
+		resp.raise_for_status()
+		return resp.json()
+
+
+class SearcherClient:
+	"""Menggantikan Searcher — TIDAK load model apa pun, murni HTTP client."""
+
+	def __init__(self, base_url: str):
+		self.base_url = base_url
+		self.db = RemoteDB(base_url)
+
+	def search(self, input_title: str, top_n: int = 10) -> list[dict]:
+		resp = requests.post(
+			f"{self.base_url}/search",
+			json={"judul": input_title, "top_n": top_n},
+			timeout=30,
+		)
+		resp.raise_for_status()
+		return resp.json().get("results", [])
+
+
 @st.cache_resource
-def load_searcher() -> Searcher:
-	return Searcher()
+def load_searcher() -> SearcherClient:
+	return SearcherClient(API_BASE_URL)
 
 
 def do_login(username, password):
