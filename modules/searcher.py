@@ -4,9 +4,9 @@ from modules.preprocessor import preprocess_text
 
 
 class Searcher:
-	def __init__(self):
-		self.embedder = Embedder()
-		self.db = VectorDatabase()
+	def __init__(self, embedder: Embedder | None = None, db: VectorDatabase | None = None):
+		self.embedder = embedder or Embedder()
+		self.db = db or VectorDatabase()
 
 	def search(self, input_title: str, top_n: int = 10) -> list[dict]:
 		"""

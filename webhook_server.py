@@ -16,6 +16,19 @@ from modules.embedder import Embedder
 from modules.preprocessor import combine_title_abstract
 
 
+from modules.searcher import Searcher
+
+_searcher = None
+
+def get_searcher() -> Searcher:
+	"""Lazy load Searcher (singleton), reuse embedder & db yang sama."""
+	global _searcher
+	if _searcher is None:
+		_searcher = Searcher(embedder=get_embedder(), db=get_database())
+	return _searcher
+
+
+
 # ============================================================================
 # Setup Logging
 # ============================================================================
@@ -29,6 +42,22 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # Pydantic Models
 # ============================================================================
+
+class SearchRequest(BaseModel):
+	judul: str
+	top_n: int = 10
+
+class SearchResultItem(BaseModel):
+	judul: str
+	abstrak: str
+	mahasiswa: str
+	tahun: str
+	prodi: str
+	similarity: float
+
+class SearchResponse(BaseModel):
+	results: list[SearchResultItem]
+
 class SubmissionData(BaseModel):
 	"""Schema untuk data yang diterima dari Google Form (via Apps Script)."""
 	nama: str
@@ -608,6 +637,42 @@ async def get_status():
 		error_msg = str(exc)
 		logger.error(f"[Webhook] Error getting status: {error_msg}", exc_info=True)
 		raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/search", response_model=SearchResponse)
+async def search_endpoint(payload: SearchRequest):
+	"""Endpoint pencarian kemiripan — dipanggil oleh Streamlit via HTTP."""
+	try:
+		searcher = get_searcher()
+		results = searcher.search(payload.judul, top_n=payload.top_n)
+		return SearchResponse(results=results)
+	except Exception as exc:
+		raise HTTPException(status_code=500, detail=f"Search error: {str(exc)}")
+
+
+@app.get("/documents")
+async def list_documents():
+	"""List semua dokumen — dipakai halaman admin (page_manajemen)."""
+	db = get_database()
+	return db.get_all()
+
+
+@app.delete("/documents/{doc_id}")
+async def delete_document(doc_id: str):
+	"""Hapus dokumen berdasarkan ID."""
+	db = get_database()
+	try:
+		db.delete(doc_id)
+		return {"status": "success", "id": doc_id}
+	except Exception as exc:
+		raise HTTPException(status_code=500, detail=f"Gagal menghapus: {str(exc)}")
+
+
+@app.get("/sync-stats")
+async def sync_stats():
+	"""Statistik sinkronisasi untuk sidebar & tab info admin."""
+	db = get_database()
+	return db.get_sync_stats()
+
 
 
 if __name__ == "__main__":
