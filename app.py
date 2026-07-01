@@ -206,7 +206,7 @@ def page_pencarian(searcher):
 				st.error("Gagal terhubung ke server pencarian. Coba lagi dalam beberapa saat.")
 				st.caption(f"Detail teknis: {search_error}")
 
-			if not results:
+			elif not results:
 				st.warning("Tidak ada data yang bisa ditampilkan. Pastikan database sudah terisi.")
 			else:
 				st.success(f"Ditemukan {len(results)} judul dengan kemiripan tertinggi.")
