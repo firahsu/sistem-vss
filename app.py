@@ -5,7 +5,6 @@ from datetime import datetime
 
 import os
 import requests
-from modules.preprocessor import combine_title_abstract
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
 
@@ -47,6 +46,12 @@ class RemoteDB:
 		resp = requests.delete(f"{self.base_url}/documents/{doc_id}", timeout=10)
 		resp.raise_for_status()
 		return resp.json()
+	
+	def get_all_logs(self) -> dict:
+		resp = requests.get(f"{self.base_url}/logs", timeout=15)
+		resp.raise_for_status()
+		return resp.json()
+
 
 
 class SearcherClient:

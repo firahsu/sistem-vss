@@ -648,6 +648,12 @@ async def search_endpoint(payload: SearchRequest):
 	except Exception as exc:
 		raise HTTPException(status_code=500, detail=f"Search error: {str(exc)}")
 
+@app.get("/logs")
+async def list_logs():
+	"""List semua log sinkronisasi — dipakai tab Log Status di admin panel."""
+	db = get_database()
+	return db.get_all_logs()
+
 
 @app.get("/documents")
 async def list_documents():
