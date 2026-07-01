@@ -622,21 +622,21 @@ async def webhook_batch(data: BatchSubmissionData):
 
 @app.get("/status")
 async def get_status():
-	"""Endpoint untuk cek jumlah dokumen yang sudah tersimpan."""
+	"""Endpoint RINGAN — cuma hitung jumlah dokumen. TIDAK melakukan full-scan stats.
+	Untuk statistik lengkap (status_counts, source_counts, dll), pakai /sync-stats."""
 	try:
 		db = get_database()
 		count = db.count()
-		stats = db.get_sync_stats()
 		logger.info(f"[Webhook] Status check: {count} dokumen di database")
 		return {
 			"status": "ok",
 			"total_documents": count,
-			"sync_stats": stats,
 		}
 	except Exception as exc:
 		error_msg = str(exc)
 		logger.error(f"[Webhook] Error getting status: {error_msg}", exc_info=True)
 		raise HTTPException(status_code=500, detail=error_msg)
+
 
 @app.post("/search", response_model=SearchResponse)
 async def search_endpoint(payload: SearchRequest):

@@ -76,6 +76,18 @@ def load_searcher() -> SearcherClient:
 	return SearcherClient(API_BASE_URL)
 
 
+@st.cache_data(ttl=5)
+def check_backend_health(base_url: str, timeout: float = 3.0) -> tuple[bool, str | None]:
+	"""Cek apakah FastAPI backend bisa diakses. Di-cache 5 detik agar tidak
+	nge-ping server di setiap rerun Streamlit."""
+	try:
+		resp = requests.get(f"{base_url}/", timeout=timeout)
+		resp.raise_for_status()
+		return True, None
+	except requests.exceptions.RequestException as exc:
+		return False, str(exc)
+
+
 def do_login(username, password):
 	if username == "admin" and password == "admin123":
 		st.session_state["is_admin"] = True
@@ -121,17 +133,20 @@ def format_timestamp(value):
 
 def get_sync_stats_safe(searcher):
 	db = searcher.db
-	getter = getattr(db, "get_sync_stats", None)
-	if callable(getter):
-		try:
-			return getter()
-		except Exception as exc:
-			st.warning(f"Gagal memuat statistik sinkronisasi: {exc}")
+	try:
+		return db.get_sync_stats()
+	except Exception as exc:
+		st.warning(f"Gagal memuat statistik sinkronisasi: {exc}")
+
+	try:
+		fallback_count = db.count()
+	except Exception:
+		fallback_count = 0
 
 	return {
-		"total_documents": db.count() if hasattr(db, "count") else 0,
+		"total_documents": fallback_count,
 		"total_logs": 0,
-		"total_records": db.count() if hasattr(db, "count") else 0,
+		"total_records": fallback_count,
 		"status_counts": {},
 		"source_counts": {},
 		"form_submit_count": 0,
@@ -172,14 +187,24 @@ def page_pencarian(searcher):
 		if input_title.strip() == "":
 			st.warning("Masukkan judul terlebih dahulu.")
 		else:
+			search_error = None
+			results = []
 			with st.status(
 				"Sedang mencari kemiripan... mohon tunggu, jangan klik tombol berulang.",
 				expanded=True,
 			) as search_status:
 				st.write("Memproses input judul dan menghitung embedding...")
-				results = searcher.search(input_title, top_n=top_n)
-				st.write("Menyiapkan hasil untuk ditampilkan...")
-				search_status.update(label="Pencarian selesai.", state="complete", expanded=False)
+				try:
+					results = searcher.search(input_title, top_n=top_n)
+					st.write("Menyiapkan hasil untuk ditampilkan...")
+					search_status.update(label="Pencarian selesai.", state="complete", expanded=False)
+				except requests.exceptions.RequestException as exc:
+					search_error = str(exc)
+					search_status.update(label="Pencarian gagal.", state="error", expanded=True)
+
+			if search_error is not None:
+				st.error("Gagal terhubung ke server pencarian. Coba lagi dalam beberapa saat.")
+				st.caption(f"Detail teknis: {search_error}")
 
 			if not results:
 				st.warning("Tidak ada data yang bisa ditampilkan. Pastikan database sudah terisi.")
@@ -306,20 +331,17 @@ def page_manajemen(searcher):
 
 
 # MAIN EXECUTION
+searcher = load_searcher()
 
-searcher = None
-init_error = None
+backend_ok, backend_error = check_backend_health(API_BASE_URL)
 
-try:
-	searcher = load_searcher()
-except Exception as exc:
-	init_error = exc
-
-if init_error is not None:
+if not backend_ok:
 	st.error(
-		"Gagal menginisialisasi model embedding. Cek koneksi internet atau cache model HuggingFace, lalu refresh halaman."
+		"Tidak bisa terhubung ke server backend (FastAPI). "
+		"Pastikan `webhook_server.py` sedang berjalan dan bisa diakses."
 	)
-	st.caption(f"Detail teknis: {init_error}")
+	st.caption(f"URL yang dicoba: {API_BASE_URL}")
+	st.caption(f"Detail teknis: {backend_error}")
 	st.stop()
 
 
@@ -329,10 +351,11 @@ with st.sidebar:
 	st.markdown("**Kemiripan Judul TA**")
 	st.divider()
 
-	total_data = searcher.db.count()
 	sidebar_stats = get_sync_stats_safe(searcher)
+	total_data = sidebar_stats.get("total_documents", 0)
 	st.caption(f"📁 {total_data} judul tersimpan")
 	st.caption(f"⏱️ Sinkronisasi terakhir: {format_timestamp(sidebar_stats.get('latest_sync_at'))}")
+
 
 	if st.session_state["is_admin"]:
 		st.markdown("⚙️ **Administrator | admin**")
